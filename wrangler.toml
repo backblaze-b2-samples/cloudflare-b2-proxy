@@ -1,0 +1,16 @@
+name = "cf-b2-webhook"
+type = "webpack"
+
+account_id = ""
+workers_dev = true
+route = ""
+zone_id = ""
+compatibility_date = "2022-02-24"
+
+# Don't put AWS_SECRET_ACCESS_KEY in this file!
+# You should set it as a secret, for example:
+# echo "<your b2 application key>" | wrangler secret put AWS_SECRET_ACCESS_KEY
+[vars]
+AWS_ACCESS_KEY_ID = "<your b2 application key id>"
+AWS_S3_ENDPOINT = "<your S3 endpoint - e.g. s3.us-west-001.backblazeb2.com >"
+WEBHOOK_URL = "<e.g. https://api.example.com/webhook/1 >"
