@@ -27,7 +27,7 @@ AWS_S3_ENDPOINT = "<your S3 endpoint - e.g. s3.us-west-001.backblazeb2.com >"
 WEBHOOK_URL = "<e.g. https://api.example.com/webhook/1 >"
 ```
 
-You must also configure `AWS_SECRET_ACCESS_KEY` as a secret:
+You must also configure `AWS_SECRET_ACCESS_KEY` as a [secret](https://blog.cloudflare.com/workers-secrets-environment/):
 
 ```bash
 echo "<your b2 application key>" | wrangler secret put AWS_SECRET_ACCESS_KEY
