@@ -13,7 +13,8 @@ const [ , aws_region] = AWS_S3_ENDPOINT.match(endpointRegex);
 const aws = new AwsClient({
     "accessKeyId": AWS_ACCESS_KEY_ID,
     "secretAccessKey": AWS_SECRET_ACCESS_KEY,
-    "region": aws_region
+    "service": "s3",
+    "region": aws_region,
 });
 
 
@@ -102,7 +103,6 @@ function errorResponse() {
 }
 
 
-
 // Where the magic happens...
 async function handleRequest(event) {
     const request = event.request;
@@ -152,7 +152,7 @@ async function handleRequest(event) {
             status: response.status,
             url: response.url,
         })
-      })    
+      })
     );
 
     return response;
