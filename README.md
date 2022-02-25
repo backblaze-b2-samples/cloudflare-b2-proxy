@@ -52,7 +52,9 @@ You can customize the `handleRequest()` function to add additional data as you r
 
 ## Limitations
 
-The entire request, including its body, must fit into available memory. [Cloudflare Workers have 128MB available for use](https://developers.cloudflare.com/workers/platform/limits#worker-limits), of which about 30MB is used by the system. Objects larger than about 80-90MB should be processed in multiple parts.
+When putting objects, most clients send a SHA-256 hash of the payload in the `x-amz-content-sha256` header. If this header is not present, then the entire request, including its body, must fit into available memory so the worker can create the hash. [Cloudflare Workers have 128MB available for use](https://developers.cloudflare.com/workers/platform/limits#worker-limits), of which about 30MB is used by the system. Objects larger than about 80-90MB should be processed in multiple parts.
+
+If the `x-amz-content-sha256` is present, then the worker does not have to read the request body into memory, and there is no upper limit on payload size.
 
 ## Wrangler
 
