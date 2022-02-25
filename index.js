@@ -111,11 +111,13 @@ async function handleRequest(event) {
     var url = new URL(request.url);
     url.hostname = AWS_S3_ENDPOINT;
 
-    // Read the body into memory
-    // Note - Cloudflare Workers have 128MB available to them, of which
-    // the system uses about 30MB. Any payload bigger than about 95MB
-    // will trigger an out of memory error at this point!
-    const body = await toArrayBuffer(request.body);
+    // If there is no x-amz-content-sha256, we need to read the body into memory
+    // Note - Cloudflare Workers have 128MB available to them, of which the 
+    // system uses about 30MB. Any payload bigger than about 95MB will trigger 
+    // an out of memory error at this point!
+    const body = request.headers.get("x-amz-content-sha256") 
+        ? request.body 
+        : await toArrayBuffer(request.body);
 
     // Only handle requests signed by our configured key.
     if (!await verifySignature(request, body)) {
