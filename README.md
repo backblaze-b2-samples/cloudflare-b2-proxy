@@ -1,6 +1,6 @@
 # Cloudflare Worker B2 Webhook
 
-Proxy Backblaze S3 compatible API requests, sending notifications to a webhook.
+Proxy Backblaze S3 compatible API requests, optionally sending notifications to a webhook.
 
 * Incoming requests must be signed with the same credentials that you configure in the worker. The worker validates the AWS V4 signature on all downstream (incoming) requests and then signs the upstream (outgoing) request.
 * Notifications are dispatched asynchronously to avoid delaying the response to the client.
@@ -18,7 +18,7 @@ Informal testing suggests that there appears to be negligible performance overhe
 
 ## Configuration
 
-You must configure the following values in `wrangler.toml`
+You must configure `AWS_ACCESS_KEY_ID` and `AWS_S3_ENDPOINT` in `wrangler.toml`. Configure `WEBHOOK_URL` if you wish to supply a webhook URL.
 
 ```toml
 [vars]
@@ -35,7 +35,7 @@ echo "<your b2 application key>" | wrangler secret put AWS_SECRET_ACCESS_KEY
 
 ## Webhook Notification
 
-The worker POSTs a JSON payload to the configured webhook for each request that it processes. For example:
+If you set `WEBHOOK_URL`, the worker POSTs a JSON payload to that URL for each request that it processes. For example:
 
 ```json
 {
@@ -54,7 +54,7 @@ You can customize the `handleRequest()` function to add additional data as you r
 
 When putting objects, most clients send a SHA-256 hash of the payload in the `x-amz-content-sha256` header. If this header is not present, then the entire request, including its body, must fit into available memory so the worker can create the hash. [Cloudflare Workers have 128MB available for use](https://developers.cloudflare.com/workers/platform/limits#worker-limits), of which about 30MB is used by the system. Objects larger than about 80-90MB should be processed in multiple parts.
 
-If the `x-amz-content-sha256` is present, then the worker does not have to read the request body into memory, and there is no upper limit on payload size.
+If the `x-amz-content-sha256` is present, as is usually the case, then the worker does not have to read the request body into memory, and there is no upper limit on payload size.
 
 ## Wrangler
 

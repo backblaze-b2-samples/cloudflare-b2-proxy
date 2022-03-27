@@ -138,24 +138,26 @@ async function handleRequest(event) {
     // Wait for the upstream response
     const response = await fetch(signedRequest);
 
-    // This will fire the fetch to the webhook asynchronously so the
-    // response is not delayed.
-    event.waitUntil(
-      fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            contentLength: request.headers.get('content-length'),
-            contentType: request.headers.get('content-type'),
-            method: request.method,
-            signatureTimestamp: request.headers.get('x-amz-date'),
-            status: response.status,
-            url: response.url,
-        })
-      })
-    );
+    if (WEBHOOK_URL) {
+        // This will fire the fetch to the webhook asynchronously so the
+        // response is not delayed.
+        event.waitUntil(
+          fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contentLength: request.headers.get('content-length'),
+                contentType: request.headers.get('content-type'),
+                method: request.method,
+                signatureTimestamp: request.headers.get('x-amz-date'),
+                status: response.status,
+                url: response.url,
+            })
+          })
+        );        
+    }
 
     return response;
 }
