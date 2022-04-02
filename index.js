@@ -126,36 +126,37 @@ async function handleRequest(event) {
 
     // Certain headers appear in the incoming request but are
     // removed from the outgoing request. If they are in the
-    // signed headers, B2 can't validate it.
+    // signed headers, B2 can't validate the signature.
     const headers = filterHeaders(request.headers);
 
+    // Sign the new request
     var signedRequest = await aws.sign(url, {
         method: request.method,
         headers: headers,
         body: body
     });
 
-    // Wait for the upstream response
+    // Send the signed request to B2 and wait for the upstream response
     const response = await fetch(signedRequest);
 
     if (WEBHOOK_URL) {
         // This will fire the fetch to the webhook asynchronously so the
         // response is not delayed.
         event.waitUntil(
-          fetch(WEBHOOK_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                contentLength: request.headers.get('content-length'),
-                contentType: request.headers.get('content-type'),
-                method: request.method,
-                signatureTimestamp: request.headers.get('x-amz-date'),
-                status: response.status,
-                url: response.url,
+            fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contentLength: request.headers.get('content-length'),
+                    contentType: request.headers.get('content-type'),
+                    method: request.method,
+                    signatureTimestamp: request.headers.get('x-amz-date'),
+                    status: response.status,
+                    url: response.url,
+                })
             })
-          })
         );        
     }
 
