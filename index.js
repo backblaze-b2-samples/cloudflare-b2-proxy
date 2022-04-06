@@ -23,13 +23,6 @@ addEventListener('fetch', function(event) {
 });
 
 
-// Request body is a ReadableStream - aws4fetch needs an ArrayBuffer
-function toArrayBuffer(body) {
-    // Returns a promise that resolves with an ArrayBuffer.
-    return body ? (new Response(body)).arrayBuffer() : undefined;
-}
-
-
 // These headers appear in the request, but are not passed upstream
 const UNSIGNABLE_HEADERS = [
     'x-forwarded-proto',
@@ -111,16 +104,8 @@ async function handleRequest(event) {
     var url = new URL(request.url);
     url.hostname = AWS_S3_ENDPOINT;
 
-    // If there is no x-amz-content-sha256, we need to read the body into memory
-    // Note - Cloudflare Workers have 128MB available to them, of which the 
-    // system uses about 30MB. Any payload bigger than about 95MB will trigger 
-    // an out of memory error at this point!
-    const body = request.headers.get("x-amz-content-sha256") 
-        ? request.body 
-        : await toArrayBuffer(request.body);
-
     // Only handle requests signed by our configured key.
-    if (!await verifySignature(request, body)) {
+    if (!await verifySignature(request, request.body)) {
         return errorResponse();
     }
 
@@ -133,13 +118,17 @@ async function handleRequest(event) {
     var signedRequest = await aws.sign(url, {
         method: request.method,
         headers: headers,
-        body: body
+        body: request.body
     });
 
     // Send the signed request to B2 and wait for the upstream response
     const response = await fetch(signedRequest);
 
     if (WEBHOOK_URL) {
+        // Convert content length from a string to an integer
+        let contentLength = request.headers.get('content-length');
+        contentLength = contentLength ? parseInt(contentLength) : null;
+
         // This will fire the fetch to the webhook asynchronously so the
         // response is not delayed.
         event.waitUntil(
@@ -149,12 +138,12 @@ async function handleRequest(event) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    contentLength: request.headers.get('content-length'),
+                    contentLength: contentLength,
                     contentType: request.headers.get('content-type'),
                     method: request.method,
                     signatureTimestamp: request.headers.get('x-amz-date'),
                     status: response.status,
-                    url: response.url,
+                    url: response.url
                 })
             })
         );        
