@@ -10,11 +10,11 @@ You can use any S3 SDK or CLI to send requests as long as you set the endpoint U
 ```bash
 % export AWS_ACCESS_KEY_ID=<your b2 application key id>
 % export AWS_SECRET_ACCESS_KEY=<your b2 application key> 
-% aws s3 cp --endpoint-url https://cf-b2-webhook.<your-subdomain>.workers.dev hello.txt s3://<your-bucket-name>/hello.txt
+% aws s3 cp --endpoint-url https://cloudflare-b2-proxy.<your-subdomain>.workers.dev hello.txt s3://<your-bucket-name>/hello.txt
 upload: hello.txt to s3://<your-bucket-name>/hello.txt
 ```
 
-Informal testing suggests that there appears to be negligible performance overhead imposed by the signature verification and resigning.
+Informal testing suggests that there is negligible performance overhead imposed by the signature verification and resigning.
 
 ## Configuration
 
@@ -55,7 +55,7 @@ You can customize the `handleRequest()` function to add additional data as you r
 You can use this repository as a template for your own worker using [`wrangler`](https://github.com/cloudflare/wrangler):
 
 ```bash
-wrangler generate projectname https://github.com/Backblaze-B2-Samples/cf-b2-webhook
+wrangler generate projectname https://github.com/backblaze-b2-samples/cloudflare-b2-proxy
 ```
 
 ## Serverless
