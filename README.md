@@ -1,11 +1,11 @@
-# Cloudflare Worker B2 Webhook
+# Cloudflare Worker B2 Proxy
 
 Proxy Backblaze S3 compatible API requests, optionally sending notifications to a webhook.
 
 * Incoming requests must be signed with the same credentials that you configure in the worker. The worker validates the AWS V4 signature on all downstream (incoming) requests and then signs the upstream (outgoing) request.
 * Notifications are dispatched asynchronously to avoid delaying the response to the client.
 
-You can use any S3 SDK or CLI to send requests as long as you set the endpoint URL to the worker endpoint:
+You can use any S3 SDK or CLI to send requests as long as you set the endpoint URL to the worker endpoint. For example:
 
 ```bash
 % export AWS_ACCESS_KEY_ID=<your b2 application key id>
