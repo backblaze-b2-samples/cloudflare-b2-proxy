@@ -1,20 +1,20 @@
-# Cloudflare Worker B2 Webhook
+# Cloudflare Worker B2 Proxy
 
 Proxy Backblaze S3 compatible API requests, optionally sending notifications to a webhook.
 
 * Incoming requests must be signed with the same credentials that you configure in the worker. The worker validates the AWS V4 signature on all downstream (incoming) requests and then signs the upstream (outgoing) request.
 * Notifications are dispatched asynchronously to avoid delaying the response to the client.
 
-You can use any S3 SDK or CLI to send requests as long as you set the endpoint URL to the worker endpoint:
+You can use any S3 SDK or CLI to send requests as long as you set the endpoint URL to the worker endpoint. For example:
 
 ```bash
 % export AWS_ACCESS_KEY_ID=<your b2 application key id>
 % export AWS_SECRET_ACCESS_KEY=<your b2 application key> 
-% aws s3 cp --endpoint-url https://cf-b2-webhook.<your-subdomain>.workers.dev hello.txt s3://<your-bucket-name>/hello.txt
+% aws s3 cp --endpoint-url https://cloudflare-b2-proxy.<your-subdomain>.workers.dev hello.txt s3://<your-bucket-name>/hello.txt
 upload: hello.txt to s3://<your-bucket-name>/hello.txt
 ```
 
-Informal testing suggests that there appears to be negligible performance overhead imposed by the signature verification and resigning.
+Informal testing suggests that there is negligible performance overhead imposed by the signature verification and resigning.
 
 ## Configuration
 
@@ -55,7 +55,7 @@ You can customize the `handleRequest()` function to add additional data as you r
 You can use this repository as a template for your own worker using [`wrangler`](https://github.com/cloudflare/wrangler):
 
 ```bash
-wrangler generate projectname https://github.com/Backblaze-B2-Samples/cf-b2-webhook
+wrangler generate projectname https://github.com/backblaze-b2-samples/cloudflare-b2-proxy
 ```
 
 ## Serverless
