@@ -1,4 +1,4 @@
-name = "cf-b2-webhook"
+name = "cloudflare-b2-proxy"
 type = "webpack"
 
 account_id = ""
@@ -7,11 +7,12 @@ route = ""
 zone_id = ""
 compatibility_date = "2022-02-24"
 
-# Don't put AWS_SECRET_ACCESS_KEY in this file!
-# You should set it as a secret, for example:
+# Don't put your application key in this file!
+# You should set it as a secret in the Cloudflare dashboard or at the command line:
 # echo "<your b2 application key>" | wrangler secret put AWS_SECRET_ACCESS_KEY
 [vars]
 AWS_ACCESS_KEY_ID = "<your b2 application key id>"
+AWS_SECRET_ACCESS_KEY = "Remove this line after you make AWS_SECRET_ACCESS_KEY a secret in the UI!"
 AWS_S3_ENDPOINT = "<your S3 endpoint - e.g. s3.us-west-001.backblazeb2.com >"
-# WEBHOOK_URL is optional
+# WEBHOOK_URL is optional - you can set it to an empty string
 WEBHOOK_URL = "<e.g. https://api.example.com/webhook/1 >"

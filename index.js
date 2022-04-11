@@ -17,6 +17,25 @@ const aws = new AwsClient({
     "region": aws_region,
 });
 
+const unsignedError =
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Error>
+    <Code>AccessDenied</Code>
+    <Message>Unauthenticated requests are not allowed for this api</Message>
+</Error>`;
+
+// Could add more detail regarding the specific error, but this enough for now
+const validationError = 
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ErrorResponse xmlns="https://iam.amazonaws.com/doc/2010-05-08/">
+  <Error>
+    <Type>Sender</Type>
+    <Code>SignatureDoesNotMatch</Code>
+    <Message>Signature validation failed.</Message>
+  </Error>
+  <RequestId>0300D815-9252-41E5-B587-F189759A21BF</RequestId>
+</ErrorResponse>`;
+
 
 addEventListener('fetch', function(event) {
     event.respondWith(handleRequest(event))
@@ -37,11 +56,17 @@ function filterHeaders(headers) {
 }
 
 
+function SignatureMissingException() {}
+
+
+function SignatureInvalidException() {}
+
+
 // Verify the signature on the incoming request
 async function verifySignature(request, body) {
     const authorization = request.headers.get('Authorization');
     if (!authorization) {
-        return false;
+        throw new SignatureMissingException();
     }
 
     // Parse the AWS V4 signature value
@@ -53,7 +78,7 @@ async function verifySignature(request, body) {
 
     // Verify that the request was signed with the expected key
     if (credential[0] != AWS_ACCESS_KEY_ID) {
-        return false;
+        throw new SignatureInvalidException();
     }
 
     // Use the timestamp from the incoming signature
@@ -77,22 +102,9 @@ async function verifySignature(request, body) {
     // All we need is the signature component of the Authorization header
     const [ , , , generatedSignature] = request.headers.get('Authorization').match(re);
 
-    return signature === generatedSignature;
-}
-
-
-// Could add more detail regarding the specific error, but this enough for now
-function errorResponse() {
-    return new Response(
-`<ErrorResponse xmlns="https://iam.amazonaws.com/doc/2010-05-08/">
-  <Error>
-    <Type>Sender</Type>
-    <Code>SignatureDoesNotMatch</Code>
-    <Message>Signature validation failed.</Message>
-  </Error>
-  <RequestId>0300D815-9252-41E5-B587-F189759A21BF</RequestId>
-</ErrorResponse>`, 
-        { status: 403 });
+    if (signature !== generatedSignature) {
+        throw new SignatureInvalidException();
+    }
 }
 
 
@@ -105,8 +117,21 @@ async function handleRequest(event) {
     url.hostname = AWS_S3_ENDPOINT;
 
     // Only handle requests signed by our configured key.
-    if (!await verifySignature(request, request.body)) {
-        return errorResponse();
+    try {
+        await verifySignature(request, request.body);
+    } catch (e) {
+        // Signature is missing or bad - deny the request
+        return new Response(
+            (e instanceof SignatureMissingException) ? 
+                unsignedError : 
+                validationError,
+            {
+                status: 403,
+                headers: {
+                    'Content-Type': 'application/xml',
+                    'Cache-Control': 'max-age=0, no-cache, no-store'
+                }
+            });
     }
 
     // Certain headers appear in the incoming request but are
