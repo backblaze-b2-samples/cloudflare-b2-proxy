@@ -63,7 +63,7 @@ function SignatureInvalidException() {}
 
 
 // Verify the signature on the incoming request
-async function verifySignature(request, body) {
+async function verifySignature(request) {
     const authorization = request.headers.get('Authorization');
     if (!authorization) {
         throw new SignatureMissingException();
@@ -95,7 +95,7 @@ async function verifySignature(request, body) {
     const signedRequest = await aws.sign(request.url, {
         method: request.method,
         headers: headersToSign,
-        body: body,
+        body: request.body,
         aws: { datetime: datetime }
     });
 
@@ -118,7 +118,7 @@ async function handleRequest(event) {
 
     // Only handle requests signed by our configured key.
     try {
-        await verifySignature(request, request.body);
+        await verifySignature(request);
     } catch (e) {
         // Signature is missing or bad - deny the request
         return new Response(
