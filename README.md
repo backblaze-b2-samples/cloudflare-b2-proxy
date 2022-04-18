@@ -1,4 +1,4 @@
-# Cloudflare Worker B2 Proxy
+# Cloudflare Worker Backblaze B2 Proxy
 
 Proxy Backblaze S3 compatible API requests, optionally sending notifications to a webhook.
 
