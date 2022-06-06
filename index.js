@@ -100,7 +100,7 @@ async function verifySignature(request) {
     });
 
     // All we need is the signature component of the Authorization header
-    const [ , , , generatedSignature] = request.headers.get('Authorization').match(re);
+    const [ , , , generatedSignature] = signedRequest.headers.get('Authorization').match(re);
 
     if (signature !== generatedSignature) {
         throw new SignatureInvalidException();
