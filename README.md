@@ -13,6 +13,7 @@ You can use any S3 SDK or CLI to send requests as long as you set the endpoint U
 % aws s3 cp --endpoint-url https://cloudflare-b2-proxy.<your-subdomain>.workers.dev hello.txt s3://<your-bucket-name>/hello.txt
 upload: hello.txt to s3://<your-bucket-name>/hello.txt
 ```
+__Note that your configuration in `~/.aws/` may override authentication and/or region and cause 403s.__
 
 Informal testing suggests that there is negligible performance overhead imposed by the signature verification and resigning.
 
