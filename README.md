@@ -9,7 +9,8 @@ You can use any S3 SDK or CLI to send requests as long as you set the endpoint U
 
 ```bash
 % export AWS_ACCESS_KEY_ID=<your b2 application key id>
-% export AWS_SECRET_ACCESS_KEY=<your b2 application key> 
+% export AWS_SECRET_ACCESS_KEY=<your b2 application key>
+% export AWS_REGION=<your b2 bucket's region>
 % aws s3 cp --endpoint-url https://cloudflare-b2-proxy.<your-subdomain>.workers.dev hello.txt s3://<your-bucket-name>/hello.txt
 upload: hello.txt to s3://<your-bucket-name>/hello.txt
 ```
