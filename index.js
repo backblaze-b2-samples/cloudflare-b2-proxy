@@ -96,7 +96,7 @@ async function verifySignature(request) {
         method: request.method,
         headers: headersToSign,
         body: request.body,
-        aws: { datetime: datetime }
+        aws: { datetime: datetime, allHeaders:true }
     });
 
     // All we need is the signature component of the Authorization header
